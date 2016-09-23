@@ -1,7 +1,7 @@
 #include "ace/OS_NS_time.h"
 #include "log.h"
 #include "datatimer.h"
-#include "datask.h"
+#include "timertask.h"
 #include "constant.h"
 #include "processor.h"
 
@@ -48,7 +48,7 @@ int DataTimer::handle_timeout (const ACE_Time_Value& current_time,
     hmsg->cont(tmsg);
     head->cont(hmsg);
     
-    DATASK::instance()->putq(head);
+    TIMERTASK::instance()->putq(head);
     
     LOG_INFO("<DataTimer::handle_timeout>handle_timeout: %d \n", m_thandle);
     return 0;

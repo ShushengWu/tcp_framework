@@ -2,6 +2,7 @@
 #include "connmgr.h"
 #include "proxymgr.h"
 #include "datask.h"
+#include "timertask.h"
 #include "util.h"
 #include "daacceptor.h"
 #include "processor.h"
@@ -86,6 +87,8 @@ SVCMgr::~SVCMgr()
 
     // 停止服务
     g_run = false;
+    
+    TIMERTASK::instance()->finalize();
 
     for (int iNum = 0; iNum < g_iTaskNum; ++iNum)
     {
@@ -141,7 +144,7 @@ bool SVCMgr::onRegistTimer(TimerProcessor* pProc, const time_t& delay, const tim
     DataTimer* ptimer = new DataTimer(pProc, delay, interval);
 
     if (ptimer->getHandle() != -1 && 
-        DATASK::instance()->addTimeProc(ptimer) == true)
+        TIMERTASK::instance()->addTimeProc(ptimer) == true)
     {
         return true;
     }
@@ -159,6 +162,13 @@ bool SVCMgr::onRun()
     }
     
     // 启动服务
+    
+    if (TIMERTASK::instance()->activate(THR_NEW_LWP, 1) == -1)
+    {
+        LOG_ERROR("<SVCMgr::onRun> start timertask failed %m\n");
+        return false;
+    }
+    
     if (g_iTaskNum > 0)
     {
         if (DATASK::instance()->activate(THR_NEW_LWP, g_iTaskNum) == -1)

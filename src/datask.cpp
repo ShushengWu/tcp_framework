@@ -4,31 +4,19 @@
 #include "constant.h"
 #include "log.h"
 #include "connmgr.h"
-#include "proxymgr.h"
 #include "processor.h"
-#include "datatimer.h"
 #include "datask.h"
 
 using namespace std;
 extern bool g_run;
 
 DATask::DATask():m_mutex(), 
-                 m_pProc(NULL),
-                 m_mTProc()
+                 m_pProc(NULL)
 {
 }
 
 DATask::~DATask()
 {
-    std::map<long, DataTimer*>::iterator itr = m_mTProc.begin();
-    for (; itr != m_mTProc.end(); ++itr)
-    {
-        if (itr->second != NULL)
-        {
-            delete itr->second;
-            itr->second = NULL;
-        }
-    }
 }
 
 int DATask::put(ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>* svc,
@@ -53,21 +41,6 @@ int DATask::svc(void)
             LOG_INFO("<DATask::svc> cmd exist\n");
             mblk->release();
             break;
-        }
-        
-        if (handle == TASK_TIMER_HANDLE)
-        {
-            ACE_Message_Block* hmsg = mblk->cont();
-            long thandle = *(long*)hmsg->rd_ptr();
-            ACE_Message_Block* tmsg = hmsg->cont();
-            time_t epoch = *(time_t*)tmsg->rd_ptr();
-            
-            if (m_mTProc.find(thandle) != m_mTProc.end())
-            {
-                m_mTProc[thandle]->getProc()->onProcessor(epoch);
-            }
-            mblk->release();
-            continue;
         }
         
         // 再次确认是否请求连接是否存在，规避队列积压时请求断连
@@ -114,20 +87,6 @@ bool DATask::setProc(NetProcessor* pProc)
     {
         return false;
     }
-}
-
-bool DATask::addTimeProc(DataTimer* pTimer)
-{
-    if (pTimer != NULL && pTimer->getHandle() != -1)
-    {
-        if (m_mTProc.find(pTimer->getHandle()) == m_mTProc.end())
-        {
-            m_mTProc[pTimer->getHandle()] = pTimer;
-            return true;
-        }
-    }
-    return false;
-    
 }
 
 void DATask::finalize()

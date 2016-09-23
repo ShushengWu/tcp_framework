@@ -7,7 +7,6 @@
 #include <map>
 
 class NetProcessor;
-class DataTimer;
 
 class DATask: public ACE_Task<ACE_MT_SYNCH>
 {
@@ -25,8 +24,6 @@ class DATask: public ACE_Task<ACE_MT_SYNCH>
         void finalize();
         
         bool setProc(NetProcessor* );
-        
-        bool addTimeProc(DataTimer*);
 
     private:
         bool process(int, ACE_Message_Block*);
@@ -37,7 +34,6 @@ class DATask: public ACE_Task<ACE_MT_SYNCH>
         std::map<int, int> m_mreq;
         
         NetProcessor* m_pProc;
-        std::map<long, DataTimer*> m_mTProc;
 };
 
 typedef ACE_Unmanaged_Singleton<DATask, ACE_Null_Mutex> DATASK;
