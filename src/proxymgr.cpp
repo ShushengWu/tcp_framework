@@ -15,7 +15,7 @@ bool ProxyMgr::addSvr(int key, uint32_t ip, uint16_t port)
     itr = m_mapProxy.find(key);
     if (itr->second.servers.find(pairSvrInfo) != itr->second.servers.end())
     {
-        LOG_ERROR("<ProxyMgr::addSvr>key not exist\n");
+        LOG_ERROR("<ProxyMgr::addSvr>key exist\n");
         return false;
     }
     
@@ -88,7 +88,7 @@ int ProxyMgr::getSvrConn(int routeKey)
             handle = SVRMGR::instance()->getConn(*(itr+nPos));
             if (handle == -1)
             {
-                // ºó¶Ë·şÎñÒì³££¬Ñ¡ÔñÏÂÒ»¸ö¿ÉÓÃ·şÎñ
+                // åç«¯æœåŠ¡å¼‚å¸¸ï¼Œé€‰æ‹©ä¸‹ä¸€ä¸ªå¯ç”¨æœåŠ¡
                 continue;
             }
         }
@@ -96,3 +96,34 @@ int ProxyMgr::getSvrConn(int routeKey)
     return handle;
 }
 
+void ProxyMgr::reBuild()
+{
+    ACE_Write_Guard<ACE_RW_Thread_Mutex> guard(m_mutex);
+    MAP_PROXY::iterator itr = m_mapProxy.begin();
+    for (; itr != m_mapProxy.end(); ++itr)
+    {
+        VCT_SERVER& servers = itr->second.server_list;
+        VCT_SERVER::iterator itrSvr = servers.begin();
+        for (;itrSvr != servers.end(); ++itrSvr)
+        {
+            int iNum = SVRMGR::instance()->getHandleNum(*itrSvr);
+            if (iNum == 0)
+            {
+                // é‡å»ºè¿æ¥
+                SVRMGR::instance()->connSvr(itrSvr->first, itrSvr->second);
+            }
+            else if (iNum > 3)
+            {
+                // åˆ é™¤è¿‡å¤šè¿æ¥
+                for (int iCount = 0; iCount < iNum - 3; ++iCount)
+                {
+                    int handle = SVRMGR::instance()->getConn(*itrSvr);
+                    if ( handle != -1)
+                    {
+                        SVRMGR::instance()->rmSvrConn(itrSvr->first, itrSvr->second, handle);
+                    }
+                }
+            }
+        }
+    }
+}

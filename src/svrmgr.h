@@ -19,8 +19,8 @@ class SvrMgr
     
     enum STATUS
     {
-        ST_NORMAL = 1,                          // Á¬½ÓÕı³£
-        ST_UNNORMAL,                            // Á¬½ÓÒì³£
+        ST_NORMAL = 1,                          // è¿æ¥æ­£å¸¸
+        ST_UNNORMAL,                            // è¿æ¥å¼‚å¸¸
         ST_UNKNOWN = 255,
     };
 
@@ -29,10 +29,10 @@ class SvrMgr
         SServer() :nPos(0), eStat(ST_NORMAL), tVisitTime(0) 
         {}
 
-        uint64_t nPos;  // Ïòºó¶Ë·¢°ü¼ÆÊı
-        STATUS eStat;  // Óëºó¶Ëserver×´Ì¬
-        time_t tVisitTime;  // ×î½üÊÕµ½ĞÄÌøÊ±¼ä
-        HANDLE_SET handles;  // Óëºó¶ËserverÁ¬½Ósession¼¯ºÏ 
+        uint64_t nPos;  // å‘åç«¯å‘åŒ…è®¡æ•°
+        STATUS eStat;  // åç«¯serverçŠ¶æ€
+        time_t tVisitTime;  // æœ€è¿‘æ”¶åˆ°å¿ƒè·³æ—¶é—´
+        HANDLE_SET handles;  // ä¸åç«¯serverè¿æ¥sessioné›†åˆ 
         HANDLE_LIST handle_list;
     };
     
@@ -57,6 +57,8 @@ class SvrMgr
         bool isSvrExist(const PAIR_SVR_INFO&);
         
         void closeSvr(PAIR_SVR_INFO& pairSvrInfo);
+        
+        int getHandleNum(const PAIR_SVR_INFO& pairSvrInfo);
         
     private:
         ACE_RW_Thread_Mutex m_mutex;

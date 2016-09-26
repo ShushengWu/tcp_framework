@@ -7,6 +7,7 @@
 #include "daacceptor.h"
 #include "processor.h"
 #include "datatimer.h"
+#include "connrebuildproc.h"
 
 bool g_run = true;
 bool g_bSVCStatus = true;
@@ -39,7 +40,7 @@ SVCMgr::SVCMgr(const string& strConf)
         g_bSVCStatus = false;
     }
 
-    // ³õÊ¼»¯ÈÕÖ¾·şÎñ
+    // åˆå§‹åŒ–æœåŠ¡æ—¥å¿—
     std::string strLogPath;
     if (readConfValue(config, "log", "path", strLogPath) == false)
     {
@@ -57,7 +58,7 @@ SVCMgr::SVCMgr(const string& strConf)
         g_bSVCStatus = false;
     }
     
-    // ¶ÁÈ¡ÅäÖÃ
+    // è¯»å–é…ç½®
     std::string strNetCard;
     std::string strRemoteAddrs;
     
@@ -73,7 +74,7 @@ SVCMgr::SVCMgr(const string& strConf)
         g_bSVCStatus = false;
     }
     
-    // Á¬½Óºó¶Ë·şÎñ
+    // è¿æ¥åç«¯æœåŠ¡
     addRemoteService(strRemoteAddrs);
     
 }
@@ -85,7 +86,7 @@ SVCMgr::~SVCMgr()
     DAACCEPTOR::instance()->close();
     LOG_INFO("<SVCMgr::~SVCMgr> reactor task finish\n");
 
-    // Í£Ö¹·şÎñ
+    // åœæ­¢æœåŠ¡
     g_run = false;
     
     TIMERTASK::instance()->finalize();
@@ -113,7 +114,7 @@ int SVCMgr::onDispatch(int iRouteKey, std::string& strMsg)
     }
 }
 
-// ÇëÇóÏìÓ¦·½·¨
+// è¯·æ±‚å“åº”æ–¹æ³•
 int SVCMgr::onResponse(int handle, std::string& strMsg)
 {
     int iRet = -1;
@@ -161,8 +162,7 @@ bool SVCMgr::onRun()
         return false;
     }
     
-    // Æô¶¯·şÎñ
-    
+    // å¯åŠ¨æœåŠ¡
     if (TIMERTASK::instance()->activate(THR_NEW_LWP, 1) == -1)
     {
         LOG_ERROR("<SVCMgr::onRun> start timertask failed %m\n");
@@ -178,7 +178,7 @@ bool SVCMgr::onRun()
         }
     }
 
-    // ³õÊ¼»¯·şÎñ¶Ë¿Ú
+    // åˆå§‹åŒ–æœåŠ¡ç«¯å£
     ACE_INET_Addr listen_addr(g_port, g_strLocalAddr.c_str());
 
     if (DAACCEPTOR::instance()->open(listen_addr, ACE_Reactor::instance(), 1) == -1)
@@ -187,7 +187,12 @@ bool SVCMgr::onRun()
         return false;
     }
 
-    // ÔËĞĞ
+    // å¢åŠ é‡è¿å®šæ—¶å™¨
+    TimerProcessor* pProc = new ConnRebuildProc();
+    
+    onRegistTimer(pProc, 10, 3);
+
+    // è¿è¡Œ
     LOG_INFO("<SVCMgr::onRun> reactor task start\n");
     g_stopper = new StopperSignal();
     while (ACE_Reactor::instance()->reactor_event_loop_done() == 0)

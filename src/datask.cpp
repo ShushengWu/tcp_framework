@@ -43,7 +43,7 @@ int DATask::svc(void)
             break;
         }
         
-        // 再次确认是否请求连接是否存在，规避队列积压时请求断连
+        // 鍐嶆纭璇锋眰杩炴帴鏄惁瀛樺湪锛岃閬块槦鍒楃Н鍘嬫椂璇锋眰鏂繛
         if (CONNMGR::instance()->isExist(handle) == false)
         {
             LOG_WARNING("<DATask::svc> connection is not exist\n");

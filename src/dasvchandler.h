@@ -28,8 +28,8 @@ class DASvcHandler: public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
 
     private:
         ACE_TCHAR m_peer_addr[BUFSIZ];
-        ACE_Message_Block* m_phead;    // 标识读取内存起始位置
-        ACE_Message_Block* m_pmsg;    // 标识读取内存当前位置
+        ACE_Message_Block* m_phead;    // 鏍囪瘑璇诲彇鍐呭瓨璧峰浣嶇疆
+        ACE_Message_Block* m_pmsg;    // 鏍囪瘑璇诲彇鍐呭瓨褰撳墠浣嶇疆
 };
 
 #endif

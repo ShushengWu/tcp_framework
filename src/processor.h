@@ -1,54 +1,54 @@
 #ifndef __PROCESSOR_H
 #define __PROCESSOR_H
 
-// ĞèÒª¼Ì³ĞNetProcessor²¢ÊµÏÖonProcessor
-// ¿ò¼Üµ÷ÓÃonProcessor´¦ÀíÇëÇó
+// éœ€è¦ç»§æ‰¿NetProcessorå¹¶å®ç°onProcessor
+// æ¡†æ¶è°ƒç”¨onProcessorå¤„ç†è¯·æ±‚
 class NetProcessor
 {
     public:
     
-    // ÍøÂçÇëÇó´¦Àí·½·¨
+    // ç½‘ç»œè¯·æ±‚å¤„ç†æ–¹æ³•
     // input:
-    //     handle:    ÇëÇó¶Ë¾ä±ú
-    //     sMsg:    ÇëÇóÏûÏ¢Ìå, ²»ĞèÒª¸ºÔğÊÍ·ÅÖ¸ÕëÄÚ´æ¿é
-    //     length:    ÏûÏ¢Ìå³¤¶È
+    //     handle:    è¯·æ±‚ç«¯å¥æŸ„
+    //     sMsg:    è¯·æ±‚æ¶ˆæ¯ä½“ï¼Œä¸éœ€è¦è´Ÿè´£é‡Šæ”¾æŒ‡é’ˆå†…å­˜å—
+    //     length:    æ¶ˆæ¯ä½“é•¿åº¦
     virtual void onProcessor(int handle, const char* sMsg, int length) = 0;
 };
 
-// ĞèÒª¼Ì³ĞTimerProcessor²¢ÊµÏÖonProcessor
-// ¿ò¼Üµ÷ÓÃonProcessor´¦Àí¶¨Ê±Æ÷
+// éœ€è¦ç»§æ‰¿TimerProcessorå¹¶å®ç°onProcessor
+// æ¡†æ¶è°ƒç”¨onProcessorå¤„ç†å®šæ—¶å™¨
 class TimerProcessor
 {
     public:
     
-    // ¶¨Ê±Æ÷´¦Àí·½·¨
+    // å®šæ—¶å™¨å¤„ç†æ–¹æ³•
     // input:
-    //     iCurTime:    ¶¨Ê±Æ÷´¥·¢Ê±¼ä
+    //     iCurTime:    å®šæ—¶å™¨è§¦å‘æ—¶é—´
     virtual void onProcessor(time_t iCurTime) = 0;
 };
 
-// ·şÎñ¹ÜÀíÀà
+// æœåŠ¡ç®¡ç†ç±»
 class SVCMgr
 {
     public:
-        // ·şÎñÅäÖÃÎÄ¼ş¾ø¶ÔÂ·¾¶
+        // æœåŠ¡é…ç½®æ–‡ä»¶è·¯å¾„
         SVCMgr(const string& strConf);
         
         ~SVCMgr();
         
-        // ±»µ÷·½·¨£¬ÇëÇóÅÉ·¢·½·¨£¬½«ÇëÇóÅÉ·¢¸øºó¶Ë·şÎñ
+        // è¢«è°ƒæ–¹æ³•ï¼Œè¯·æ±‚æ´¾å‘æ–¹æ³•ã€‚å°†è¯·æ±‚æ´¾å‘ç»™åç«¯æœåŠ¡
         static int onDispatch(int iRouteKey, std::string& strMsg);
 
-        // ±»µ÷·½·¨£¬ÇëÇóÏìÓ¦·½·¨
+        // è¢«è°ƒæ–¹æ³•ï¼Œè¯·æ±‚å“åº”æ–¹æ³•
         static int onResponse(int handle, std::string& strMsg);
 
-        // ±»µ÷·½·¨£¬×¢²áÍøÂçÇëÇó´¦Àí¶ÔÏó
+        // è¢«è°ƒæ–¹æ³•ï¼Œæ³¨å†Œå“åº”è¯·æ±‚å¤„ç†å¯¹è±¡
         bool onRegistProcessor(NetProcessor* pProc);
 
-        // ±»µ÷·½·¨£¬×¢²áÇëÇó´¦Àí¶ÔÏó
+        // è¢«è°ƒæ–¹æ³•ï¼Œæ³¨å†Œå®šæ—¶å™¨å¤„ç†å¯¹è±¡
         bool onRegistTimer(TimerProcessor* pProc, const time_t& delay, const time_t& interval=0);
 
-        // ±»µ÷·½·¨£¬ÔËĞĞ·şÎñ¿ò¼Ü
+        // è¢«è°ƒæ–¹æ³•ï¼Œè¿è¡ŒæœåŠ¡æ¡†æ¶
         bool onRun();
 };
 

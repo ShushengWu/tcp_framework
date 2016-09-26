@@ -40,6 +40,8 @@ class ProxyMgr
     
     void finalize();
 
+    void reBuild();
+
     private:
         ACE_RW_Thread_Mutex m_mutex;
         MAP_PROXY m_mapProxy;

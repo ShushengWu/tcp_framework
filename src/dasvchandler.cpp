@@ -9,7 +9,7 @@
 const uint32_t MIN_MESSAGESIZE = 3*sizeof(char) + sizeof(uint32_t);
 const uint32_t MAX_MESSAGESIZE = 67108864;    // 64M
 const size_t INPUT_SIZE = 65536;    // 64K
-const int MAX_SEND_NUM = 100;    // ×î´óÁªÏµ·¢ËÍ100´Î
+const int MAX_SEND_NUM = 100;    // æœ€å¤§æ¶ˆæ¯å‘é€100æ¬¡
 
 // data protocal : 0x02|cmd|length|data|0x03 (cmd-char, length-dw)
 // length = MIN_MESSAGESIZE + len(data)
@@ -59,7 +59,7 @@ int DASvcHandler::open(void *p)
     m_phead = NULL;
     m_pmsg = NULL;
     
-    // ¼ÇÂ¼Á¬½Ó¶Ô¶Ëip:port
+    // è®°å½•è¿æ¥å¯¹ç«¯ip:port
     ACE_INET_Addr client_addr;
     this->peer().get_remote_addr (client_addr);
     client_addr.addr_to_string (m_peer_addr, sizeof m_peer_addr);
@@ -74,10 +74,10 @@ int DASvcHandler::handle_input(ACE_HANDLE)
 {
     // LOG_INFO("<DASvcHandler::handle_input> enter\n");
     ACE_Time_Value timeout(0, 600);
-    // µÚÒ»´Î¸øÁ¬½Ó·ÖÅä¶ÁÈ¡ÄÚ´æ
+    // ç¬¬ä¸€æ¬¡ç»™è¿æ¥åˆ†é…è¯»å–å†…å­˜
     if ( m_phead == NULL )
     {
-        // µÚÒ»´Î·ÖÅäĞ¡ÄÚ´æ£¬²ÉÓÃ¶ş´Î¶ÁÈ¡·½Ê½´¦ÀíÕ³°ü
+        // ç¬¬ä¸€æ¬¡åˆ†é…æœ€å°å†…å­˜ï¼Œé‡‡ç”¨äºŒæ¬¡è¯»å–æ–¹å¼å¤„ç†ç²˜åŒ…
         m_phead = new ACE_Message_Block(MIN_MESSAGESIZE);
         m_pmsg = m_phead;
     }
@@ -87,7 +87,7 @@ int DASvcHandler::handle_input(ACE_HANDLE)
         ssize_t rest = this->peer().recv(m_pmsg->wr_ptr(), m_pmsg->space(), &timeout);
         if (rest > 0)
         {
-            // ´ÓÄÚºË¶ÁÈ¡µ½Êı¾İ
+            // ä»å†…æ ¸è¯»å–åˆ°æ•°æ®
             LOG_DEBUG("<DASvcHandler::handle_input> recv %d from %s\n", 
                     rest, m_peer_addr);
             m_pmsg->wr_ptr( rest );
@@ -95,7 +95,7 @@ int DASvcHandler::handle_input(ACE_HANDLE)
             int iRet = isValidAndFinish(m_phead, iLen);
             if (iRet == 0 && iLen > m_phead->total_size())
             {
-                // ¸ù¾İ°ü´óĞ¡£¬ÖØĞÂÉèÖÃ¶ÁÈ¡»º³åÇø£¬Ò»¸ö»º³åÇø±£´æÒ»ÌõÍêÕûÏûÏ¢
+                // æ ¹æ®åŒ…å¤§å°ï¼Œé‡æ–°è®¾ç½®è¯»å–ç¼“å†²åŒºï¼Œä¸€ä¸ªç¼“å†²åŒºä¿å­˜ä¸€æ¡å®Œæ•´æ¶ˆæ¯
                 ACE_Message_Block* msg = new ACE_Message_Block(iLen);
                 msg->copy(m_pmsg->rd_ptr(), m_pmsg->length());
                 m_phead->release();
@@ -104,10 +104,10 @@ int DASvcHandler::handle_input(ACE_HANDLE)
             }
             else if (iRet == 1)
             {
-                // »ñÈ¡µ½ÍêÕûÒ»ÌõÊı¾İ
-                // Ã¿´Î´¦ÀíÒ»ÌõÇëÇó£¬½«»ú»áÈÃ¸øÆäËûÁ¬½Ó
-                // ½«ÒÑÓĞÊı¾İ´«µİ¸øÓ¦ÓÃ²ã£¬ÓÉÓ¦ÓÃ²ãÊÍ·ÅÄÚ´æ
-                // ÖØĞÂ³õÊ¼»¯head£¬ÖØĞÂ±£´æĞÂÊı¾İ
+                // è·å–åˆ°å®Œæ•´ä¸€æ¡æ•°æ®
+                // æ¯æ¬¡å¤„ç†ä¸€æ¡è¯·æ±‚ï¼Œå°†æœºä¼šè®©ç»™å…¶ä»–è¿æ¥
+                // å°†å·²æœ‰æ•°æ®ä¼ é€’ç»™åº”ç”¨å±‚ï¼Œç”±åº”ç”¨å±‚é‡Šæ”¾å†…å­˜
+                // é‡æ–°åˆå§‹åŒ–headï¼Œé‡æ–°ä¿å­˜æ–°æ•°æ®
                 DATASK::instance()->put(this, m_phead);
                 m_phead = new ACE_Message_Block(MIN_MESSAGESIZE);
                 m_pmsg = m_phead;
@@ -115,7 +115,7 @@ int DASvcHandler::handle_input(ACE_HANDLE)
             }
             else if (iRet == -1)
             {
-                // »ñÈ¡µ½·Ç·¨Êı¾İ,ÍË³ö¹Ø±ÕÁ¬½Ó
+                // è·å–åˆ°éæ³•æ•°æ®ï¼Œé€€å‡ºå…³é—­è¿æ¥
                 LOG_ERROR("<DASvcHandler::handle_input> recv invalid data peer:%s\n",
                         m_peer_addr);
                 return -1;
@@ -125,21 +125,21 @@ int DASvcHandler::handle_input(ACE_HANDLE)
         {
             if ( ACE_OS::last_error() == ETIME )
             {
-                // ´¦ÀíÒì³£µÈ´ıÏÂ´Î»ú»á
+                // å¤„ç†å¼‚å¸¸ç­‰å¾…ä¸‹æ¬¡æœºä¼š
                 LOG_WARNING("<DASvcHandler::handle_input> recv error: %m peer:%s\n", 
                         m_peer_addr);
                 return 0;
             }
             else
             {
-                // Á¬½ÓÒì³£ÍË³ö
+                // è¿æ¥å¼‚å¸¸é€€å‡º
                 LOG_ERROR("<DASvcHandler::handle_input> recv error: %m close peer:%s\n",
                         m_peer_addr);
                 return -1;
             }
         }
         
-        // ÎŞÊ£Óà¿Õ¼ä,Ğ­Òé³ö´í·µ»Ø
+        // æ— å‰©ä½™ç©ºé—´ï¼Œåè®®å‡ºé”™è¿”å›
         if ( m_pmsg->space() == 0)
         {
             LOG_ERROR("<DASvcHandler::handle_input> recv space error close peer:%s\n",
@@ -171,7 +171,7 @@ int DASvcHandler::handle_output(ACE_HANDLE)
                 || ACE_OS::last_error() == EWOULDBLOCK
                 || ACE_OS::last_error() == EAGAIN )
             {
-                // ´¦ÀíÒì³£µÈ´ıÏÂ´Î»ú»á
+                // å¤„ç†å¼‚å¸¸ç­‰å¾…ä¸‹æ¬¡æœºä¼š
                 LOG_WARNING("<DASvcHandler::handle_output> send error: %m peer:%s\n", 
                         m_peer_addr);
                 this->ungetq(mb);
@@ -179,7 +179,7 @@ int DASvcHandler::handle_output(ACE_HANDLE)
             }
             else
             {
-                // Á¬½ÓÒì³£ÍË³ö
+                // è¿æ¥å¼‚å¸¸é€€å‡º
                 LOG_ERROR("<DASvcHandler::handle_output> send error: %m close peer:%s\n",
                         m_peer_addr);
                 return -1;
@@ -188,12 +188,12 @@ int DASvcHandler::handle_output(ACE_HANDLE)
 
         if (mb->length() > 0)
         {
-           // Î´·¢ËÍÍêÏûÏ¢£¬ÖØĞÂ·ÅÈëÏûÏ¢¶ÓÁĞ
+           // æœªå‘é€å®Œæ¶ˆæ¯ï¼Œé‡æ–°æ”¾å…¥æ¶ˆæ¯é˜Ÿåˆ—
             this->ungetq(mb);
         }
         else
         {
-            // ·¢ËÍÍêÏûÏ¢ÊÍ·ÅÄÚ´æ
+            // å‘é€å®Œæ¶ˆæ¯é‡Šæ”¾å†…å­˜
             mb->release();
         }
         
@@ -204,7 +204,7 @@ int DASvcHandler::handle_output(ACE_HANDLE)
         }
     }
 
-    // Èç¹û¶ÓÁĞÎŞÊı¾İ£¬×¢Ïúepoll±ÜÃâCPU¸ß
+    // å¦‚æœé˜Ÿåˆ—æ— æ•°æ®ï¼Œæ³¨é”€epollé¿å…cpué«˜
     if (this->msg_queue()->is_empty())
     {
         this->reactor()->cancel_wakeup(this, ACE_Event_Handler::WRITE_MASK);
@@ -221,7 +221,7 @@ int DASvcHandler::handle_close(ACE_HANDLE h, ACE_Reactor_Mask mask)
     LOG_INFO("<DASvcHandler::handle_close> close connect,peer:%s, %d\n", 
              m_peer_addr, this->peer().get_handle());
     CONNMGR::instance()->rmConn(this);
-    // ÍË³öÊÍ·ÅÄÚ´æ
+    // é€€å‡ºé‡Šæ”¾å†…å­˜
     if (m_phead != NULL)
     {
         m_phead->release();

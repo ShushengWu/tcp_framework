@@ -6,7 +6,7 @@
 #include "ace/SOCK_Stream.h"
 #include "daconnector.h"
 
-// 保存连接，连接对象生命周期由acceptor和connector管理
+// 淇濆瓨杩炴帴锛岃繛鎺ュ璞＄敓鍛藉懆鏈熺敱acceptor鍜宑onnector绠＄悊
 class ConnMgr
 {
     public:    

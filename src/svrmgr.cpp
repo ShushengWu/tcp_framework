@@ -98,11 +98,11 @@ int SvrMgr::getConn(const PAIR_SVR_INFO& pairSvrInfo)
     }
     if (itrSvr->second.eStat == ST_UNNORMAL)
     {
-        // ºó¶Ë·þÎñÒì³££¬Ñ¡ÔñÏÂÒ»¸ö¿ÉÓÃ·þÎñ
+        // åŽç«¯è¿žæŽ¥å¼‚å¸¸ï¼Œé€‰æ‹©ä¸‹ä¸€ä¸ªå¯ç”¨è¿žæŽ¥
         return handle;
     }
             
-    // Ñ¡Ôñ¿ÉÓÃ·þÎñÁ¬½Ó
+    // é€‰æ‹©å¯ç”¨æœåŠ¡è¿žæŽ¥
     if (itrSvr != m_mapSvr.end() && itrSvr->second.handle_list.size() > 0)
     {
         size_t dwSize = itrSvr->second.handle_list.size();
@@ -123,5 +123,19 @@ bool SvrMgr::isSvrExist(const PAIR_SVR_INFO& pairSvrInfo)
     else
     {
         return false;
+    }
+}
+
+int SvrMgr::getHandleNum(const PAIR_SVR_INFO& pairSvrInfo)
+{
+    ACE_Read_Guard<ACE_RW_Thread_Mutex> guard(m_mutex);
+    MAP_SERVER::iterator itrSvr = m_mapSvr.find(pairSvrInfo);
+    if (itrSvr != m_mapSvr.end())
+    {
+        return itrSvr->second.handle_list.size();
+    }
+    else
+    {
+        return -1;
     }
 }
