@@ -34,14 +34,13 @@ int DATask::svc(void)
     LOG_INFO("<DATask::svc> start\n");
     for (ACE_Message_Block* mblk; getq(mblk) != -1&&g_run;)
     {
-        int handle = *(int*)mblk->rd_ptr();
-        
-        if (handle == TASK_EXIST_HANDLE)
+        if (mblk->msg_type() == ACE_Message_Block::MB_STOP)
         {
-            LOG_INFO("<DATask::svc> cmd exist\n");
+            LOG_INFO("<DATask::svc> exist\n");
             mblk->release();
             break;
         }
+        int handle = *(int*)mblk->rd_ptr();
         
         // 再次确认请求连接是否存在，规避队列积压时请求断连
         if (CONNMGR::instance()->isExist(handle) == false)
@@ -69,7 +68,7 @@ bool DATask::process(int handle, ACE_Message_Block* pmsg)
     
     if (m_pProc != NULL)
     {
-        m_pProc->onProcessor(handle, pmsg->rd_ptr()+6,  pmsg->length()-7);
+        m_pProc->onProcessor(handle, pmsg->rd_ptr(),  pmsg->length());
         bRet = true;
     }
 
@@ -92,9 +91,7 @@ bool DATask::setProc(NetProcessor* pProc)
 void DATask::finalize()
 {
     LOG_INFO("<DATask::finalize> enter\n");
-    int exithandle = TASK_EXIST_HANDLE;
-    ACE_Message_Block* head = new ACE_Message_Block(sizeof(int));
-    head->copy((char*)&exithandle, sizeof(int));
+    ACE_Message_Block* head = new ACE_Message_Block(0, ACE_Message_Block::MB_STOP);
     int flag = putq(head);
     LOG_INFO("<DATask::finalize> exit %d\n", flag);
 }

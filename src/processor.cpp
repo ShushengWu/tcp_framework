@@ -8,6 +8,7 @@
 #include "processor.h"
 #include "datatimer.h"
 #include "connrebuildproc.h"
+#include "parsepkg.h"
 
 bool g_run = true;
 bool g_bSVCStatus = true;
@@ -15,6 +16,8 @@ StopperSignal* g_stopper = NULL;
 u_int g_iTaskNum = 0;
 u_int g_port = 0;
 std::string g_strLocalAddr("127.0.0.1");
+ParsePkg* g_parser = NULL;
+
 
 SVCMgr::SVCMgr(const string& strConf)
 {
@@ -60,23 +63,26 @@ SVCMgr::SVCMgr(const string& strConf)
     
     // 读取配置
     std::string strNetCard;
-    std::string strRemoteAddrs;
-    
-    bool bflag = readConfValue(config, "localservice", "network_card", strNetCard);
-    bflag = bflag&readConfValue(config, "localservice", "port", g_port);
-    bflag = bflag&getLocalIP(strNetCard, g_strLocalAddr);
-    bflag = bflag&readConfValue(config, "task", "thread_num", g_iTaskNum);
-    bflag = bflag&readConfValue(config, "remoteservice", "svc_addr", strRemoteAddrs);
+    std::string strRemoteAddrs;    
+    readConfValue(config, "localservice", "network_card", strNetCard);
+    readConfValue(config, "localservice", "port", g_port);
+    getLocalIP(strNetCard, g_strLocalAddr);
 
+    bool bflag = readConfValue(config, "task", "thread_num", g_iTaskNum);
     if (bflag == false)
     {
         LOG_ERROR("<SVCMgr::SVCMgr> read config failed!\n");
         g_bSVCStatus = false;
     }
     
-    // 连接后端服务
-    addRemoteService(strRemoteAddrs);
-    
+    // 无后端服务，不需要建立连接
+    if (readConfValue(config, "remoteservice", "svc_addr", strRemoteAddrs) == true)
+    {
+        // 连接后端服务
+        addRemoteService(strRemoteAddrs);
+    }
+
+    g_parser = new ParsePkg();
 }
 
 SVCMgr::~SVCMgr()
@@ -179,12 +185,15 @@ bool SVCMgr::onRun()
     }
 
     // 初始化服务端口
-    ACE_INET_Addr listen_addr(g_port, g_strLocalAddr.c_str());
-
-    if (DAACCEPTOR::instance()->open(listen_addr, ACE_Reactor::instance(), 1) == -1)
+    if (g_port != 0)
     {
-        LOG_ERROR("<SVCMgr::onRun> open acceptor failed %m\n");
-        return false;
+        ACE_INET_Addr listen_addr(g_port, g_strLocalAddr.c_str());
+
+        if (DAACCEPTOR::instance()->open(listen_addr, ACE_Reactor::instance(), 1) == -1)
+        {
+            LOG_ERROR("<SVCMgr::onRun> open acceptor failed %m\n");
+            return false;
+        }
     }
 
     // 增加重连定时器
@@ -201,5 +210,11 @@ bool SVCMgr::onRun()
     }
     delete g_stopper;
     g_stopper = NULL;
+
+    if (g_parser != NULL)
+    {
+        delete g_parser;
+        g_parser = NULL;
+    }
     return true;
 }

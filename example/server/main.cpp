@@ -6,7 +6,7 @@ class RealProcessor:public NetProcessor
 {
     virtual void onProcessor(int handle, const char* sMsg, int length)
     {
-        std::cout << "handle:" << handle << "\t msg:" << std::string(sMsg, length) << std::endl; 
+        std::cout << "handle:" << handle << "\t msg:" << std::string(sMsg+3, length-4) << std::endl; 
     }
 };
 

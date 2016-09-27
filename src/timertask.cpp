@@ -32,15 +32,13 @@ int TimerTask::svc(void)
     LOG_INFO("<TimerTask::svc> start\n");
     for (ACE_Message_Block* mblk; getq(mblk) != -1&&g_run;)
     {
-        int handle = *(int*)mblk->rd_ptr();
-        
-        if (handle == TASK_EXIST_HANDLE)
+        if (mblk->msg_type() == ACE_Message_Block::MB_STOP)
         {
-            LOG_INFO("<TimerTask::svc> cmd exist\n");
+            LOG_INFO("<DATask::svc> exist\n");
             mblk->release();
             break;
         }
-        
+        int handle = *(int*)mblk->rd_ptr();
         if (handle == TASK_TIMER_HANDLE)
         {
             ACE_Message_Block* hmsg = mblk->cont();
@@ -76,9 +74,7 @@ bool TimerTask::addTimeProc(DataTimer* pTimer)
 void TimerTask::finalize()
 {
     LOG_INFO("<TimerTask::finalize> enter\n");
-    int exithandle = TASK_EXIST_HANDLE;
-    ACE_Message_Block* head = new ACE_Message_Block(sizeof(int));
-    head->copy((char*)&exithandle, sizeof(int));
+    ACE_Message_Block* head = new ACE_Message_Block(0, ACE_Message_Block::MB_STOP);
     int flag = putq(head);
     LOG_INFO("<TimerTask::finalize> exit %d\n", flag);
 }

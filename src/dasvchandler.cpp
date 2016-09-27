@@ -1,52 +1,12 @@
 #include "log.h"
 #include "connmgr.h"
 #include "datask.h"
+#include "parsepkg.h"
 #include "dasvchandler.h"
 
-#define NTOH(len) ntohs(len)
-#define HTON(len) htons(len)
+extern ParsePkg* g_parser;
 
-const uint32_t MIN_MESSAGESIZE = 3*sizeof(char) + sizeof(uint32_t);
-const uint32_t MAX_MESSAGESIZE = 67108864;    // 64M
-const size_t INPUT_SIZE = 65536;    // 64K
 const int MAX_SEND_NUM = 100;    // 最大消息发送100次
-
-// data protocal : 0x02|cmd|length|data|0x03 (cmd-char, length-dw)
-// length = MIN_MESSAGESIZE + len(data)
-
-// -1 not valid;0 valid but not finished;1 valid and finished return length;
-int DASvcHandler::isValidAndFinish(ACE_Message_Block* msg, int& iMsgSize) const
-{  
-    if (*(uint8_t*)msg->rd_ptr() != 0x02)
-    {
-        return -1;
-    }
-    
-    if (msg->total_length() < MIN_MESSAGESIZE)
-    {
-        return -1;
-    }
-    
-    iMsgSize = NTOH(*(uint32_t*)(msg->rd_ptr()+2));
-    if (iMsgSize > MAX_MESSAGESIZE)
-    {
-        return -1;
-    }
-    
-    if (iMsgSize > msg->total_length())
-    {
-        return 0;
-    }
-    
-    if (*(uint8_t*)(msg->rd_ptr() + iMsgSize - 1) == 0x03)
-    {
-        return 1;
-    }
-    else
-    {
-        return -1;
-    }
-}
 
 int DASvcHandler::open(void *p)
 {
@@ -78,7 +38,7 @@ int DASvcHandler::handle_input(ACE_HANDLE)
     if ( m_phead == NULL )
     {
         // 第一次分配最小内存，采用二次读取方式处理粘包
-        m_phead = new ACE_Message_Block(MIN_MESSAGESIZE);
+        m_phead = new ACE_Message_Block(g_parser->min_msg_size());
         m_pmsg = m_phead;
     }
 
@@ -91,8 +51,8 @@ int DASvcHandler::handle_input(ACE_HANDLE)
             LOG_DEBUG("<DASvcHandler::handle_input> recv %d from %s\n", 
                     rest, m_peer_addr);
             m_pmsg->wr_ptr( rest );
-            int iLen = 0;
-            int iRet = isValidAndFinish(m_phead, iLen);
+            size_t iLen = 0;
+            int iRet = g_parser->isValidAndFinish(m_phead->rd_ptr(), m_phead->length(), iLen);
             if (iRet == 0 && iLen > m_phead->total_size())
             {
                 // 根据包大小，重新设置读取缓冲区，一个缓冲区保存一条完整消息
@@ -109,7 +69,7 @@ int DASvcHandler::handle_input(ACE_HANDLE)
                 // 将已有数据传递给应用层，由应用层释放内存
                 // 重新初始化head，重新保存新数据
                 DATASK::instance()->put(this, m_phead);
-                m_phead = new ACE_Message_Block(MIN_MESSAGESIZE);
+                m_phead = new ACE_Message_Block(g_parser->min_msg_size());
                 m_pmsg = m_phead;
                 break;
             }
@@ -245,18 +205,11 @@ int DASvcHandler::write(ACE_Message_Block* msg)
 
 int DASvcHandler::write(std::string& strMsg)
 {
-    ACE_Message_Block* msg = new ACE_Message_Block(strMsg.length()+MIN_MESSAGESIZE);
-    *msg->wr_ptr() = 0x02;    // begin-prefix
-    msg->wr_ptr(1);
-    *msg->wr_ptr() = 0x00;    // cmd
-    msg->wr_ptr(1);
-    uint32_t msg_size = HTON(3*sizeof(char) + sizeof(uint32_t) + 
-                             (uint32_t)strMsg.length());
-    *(uint32_t*)msg->wr_ptr() = msg_size;    // msg size
-    msg->wr_ptr(4);    
-    ACE_OS::memcpy(msg->wr_ptr(), strMsg.c_str(), strMsg.length());
-    msg->wr_ptr(strMsg.length());
-    *msg->wr_ptr() = 0x03;    // end-prefix
-    msg->wr_ptr(1);
+    std::string strHead = g_parser->mkMsgHead(strMsg);
+    std::string strTail = g_parser->mkMsgTail(strMsg);
+    ACE_Message_Block* msg = new ACE_Message_Block(strMsg.length()+g_parser->min_msg_size());
+    msg->copy(strHead.data(), strHead.length());
+    msg->copy(strMsg.data(), strMsg.length());
+    msg->copy(strTail.data(), strTail.length());
     return write(msg);
 }
