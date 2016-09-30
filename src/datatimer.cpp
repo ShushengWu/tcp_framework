@@ -50,7 +50,7 @@ int DataTimer::handle_timeout (const ACE_Time_Value& current_time,
     
     TIMERTASK::instance()->putq(head);
     
-    LOG_INFO("<DataTimer::handle_timeout>handle_timeout: %d \n", m_thandle);
+    LOG_DEBUG("<DataTimer::handle_timeout>handle_timeout: %d \n", m_thandle);
     return 0;
 }
 

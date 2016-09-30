@@ -8,52 +8,6 @@
 #include "proxymgr.h"
 #include "util.h"
 
-bool readConfValue(ACE_Configuration_Heap& config,
-                   const std::string& strSection,
-                   const std::string& strName,
-                   std::string& strValue)
-{
-    ACE_Configuration_Section_Key section;
-    if (config.open_section(config.root_section(), strSection.c_str(), 0, section) == -1)
-    {
-        LOG_ERROR("<readConfValue> read config %s section failed!\n", strSection.c_str());
-        return false;
-    }
-
-    ACE_TString tstrValue;
-    if (config.get_string_value(section, strName.c_str(), tstrValue) == -1)
-    {
-        LOG_ERROR("<readConfValue> read config %s failed!\n", strName.c_str());
-        return false;
-    }
-
-    strValue = tstrValue.c_str();
-    return true;
-}
-
-bool readConfValue(ACE_Configuration_Heap& config,
-                   const std::string& strSection,
-                   const std::string& strName,
-                   u_int& iValue)
-{
-    ACE_Configuration_Section_Key section;
-    if (config.open_section(config.root_section(), strSection.c_str(), 0, section) == -1)
-    {
-        LOG_ERROR("<readConfValue> read config %s section failed!\n", strSection.c_str());
-        return false;
-    }
-
-    u_int value;
-    if (config.get_integer_value(section, strName.c_str(), value) == -1)
-    {
-        LOG_ERROR("<readConfValue> read int config %s, %s failed!\n", strSection.c_str(), strName.c_str());
-        return false;
-    }
-    iValue = value;
-
-    return true;
-}
-
 bool getLocalIP(const std::string& strEthName, std::string& strIP)
 {
     ACE_HANDLE handle = ACE_OS::socket(AF_INET, SOCK_STREAM, 0);

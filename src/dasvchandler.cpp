@@ -53,6 +53,7 @@ int DASvcHandler::handle_input(ACE_HANDLE)
             m_pmsg->wr_ptr( rest );
             size_t iLen = 0;
             int iRet = g_parser->isValidAndFinish(m_phead->rd_ptr(), m_phead->length(), iLen);
+            LOG_DEBUG("hlen:%d len:%d, ret:%d\n", m_phead->length(), iLen, iRet);
             if (iRet == 0 && iLen > m_phead->total_size())
             {
                 // 根据包大小，重新设置读取缓冲区，一个缓冲区保存一条完整消息

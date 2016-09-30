@@ -9,6 +9,7 @@
 #include "datatimer.h"
 #include "connrebuildproc.h"
 #include "parsepkg.h"
+#include "confreader.h"
 
 bool g_run = true;
 bool g_bSVCStatus = true;
@@ -29,23 +30,11 @@ SVCMgr::SVCMgr(const string& strConf)
         ACE_Reactor::instance(new ACE_Reactor(pDevPollReactor));
     }
 
-    ACE_Configuration_Heap config;
-    if (config.open() == -1)
-    {
-        LOG_ERROR("<SVCMgr::SVCMgr> init config failed!\n");
-        g_bSVCStatus = false;
-    }
-    
-    ACE_Registry_ImpExp confImporter(config);
-    if (confImporter.import_config(strConf.c_str()) == -1)
-    {
-        LOG_ERROR("<SVCMgr::SVCMgr> import config file failed!\n");
-        g_bSVCStatus = false;
-    }
+    ConfReader confReader(strConf);
 
     // 初始化服务日志
     std::string strLogPath;
-    if (readConfValue(config, "log", "path", strLogPath) == false)
+    if (confReader.readConfValue("log", "path", strLogPath) == false)
     {
         LOG_ERROR("<SVCMgr::SVCMgr> read config log path failed!\n");
         g_bSVCStatus = false;
@@ -60,15 +49,17 @@ SVCMgr::SVCMgr(const string& strConf)
         LOG_ERROR("<SVCMgr::SVCMgr> init log failed!\n");
         g_bSVCStatus = false;
     }
+
+    enable_debug();
     
     // 读取配置
     std::string strNetCard;
     std::string strRemoteAddrs;    
-    readConfValue(config, "localservice", "network_card", strNetCard);
-    readConfValue(config, "localservice", "port", g_port);
+    confReader.readConfValue("localservice", "network_card", strNetCard);
+    confReader.readConfValue("localservice", "port", g_port);
     getLocalIP(strNetCard, g_strLocalAddr);
 
-    bool bflag = readConfValue(config, "task", "thread_num", g_iTaskNum);
+    bool bflag = confReader.readConfValue("task", "thread_num", g_iTaskNum);
     if (bflag == false)
     {
         LOG_ERROR("<SVCMgr::SVCMgr> read config failed!\n");
@@ -76,7 +67,7 @@ SVCMgr::SVCMgr(const string& strConf)
     }
     
     // 无后端服务，不需要建立连接
-    if (readConfValue(config, "remoteservice", "svc_addr", strRemoteAddrs) == true)
+    if (confReader.readConfValue("remoteservice", "svc_addr", strRemoteAddrs) == true)
     {
         // 连接后端服务
         addRemoteService(strRemoteAddrs);

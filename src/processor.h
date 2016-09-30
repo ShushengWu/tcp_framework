@@ -1,6 +1,8 @@
 #ifndef __PROCESSOR_H
 #define __PROCESSOR_H
 
+typedef std::pair<uint32_t, uint16_t> PAIR_SVR_INFO;
+
 // 需要继承NetProcessor并实现onProcessor
 // 框架调用onProcessor处理请求
 class NetProcessor
@@ -50,6 +52,9 @@ class SVCMgr
 
         // 被调方法，运行服务框架
         bool onRun();
+        
+        // 更新后端服务
+        bool onUpdateRouter(std::vector<PAIR_SVR_INFO>&);
 };
 
 #endif

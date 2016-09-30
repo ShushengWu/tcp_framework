@@ -4,9 +4,11 @@ CXX = g++ -g -DACE_HAS_EVENT_POLL
 
 DEBUG = -D DEBUG
 
-CINCDIRS = -I. -I$(ACE_ROOT) 
-CLIBDIRS = -L$(ACE_ROOT)/lib 
-CDEPLIBS = -pthread -lACE 
+CINCDIRS = -I. -I$(ACE_ROOT) \
+           -I/usr/include/mysql
+CLIBDIRS = -L$(ACE_ROOT)/lib \
+           -L/usr/lib64/mysql
+CDEPLIBS = -pthread -lACE -lmysqlclient
 OBJS = $(wildcard *.o)
 BINARY = $(patsubst %.cpp, %.o, $(wildcard *.cpp))
 TARGET = libtcp_svc.so 
@@ -28,4 +30,6 @@ clean:
 install:
 	cp processor.h ../include
 	cp log.h ../include
+	cp confreader.h ../include
+	cp mysqlconn.h ../include
 	cp $(TARGET) ../lib

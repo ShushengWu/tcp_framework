@@ -2,8 +2,6 @@
 #define __UTIL_H
 #include "ace/Dev_Poll_Reactor.h"
 #include "ace/Reactor.h"
-#include "ace/Configuration.h"
-#include "ace/Configuration_Import_Export.h"
 
 class StopperSignal: public ACE_Event_Handler
 {
@@ -23,16 +21,6 @@ class StopperSignal: public ACE_Event_Handler
             ACE_Reactor::instance()->end_reactor_event_loop();
         }
 };
-
-bool readConfValue(ACE_Configuration_Heap& config,
-                   const std::string& strSection,
-                   const std::string& strName,
-                   std::string& strValue);
-                   
-bool readConfValue(ACE_Configuration_Heap& config,
-                   const std::string& strSection,
-                   const std::string& strName,
-                   u_int& iValue);
                   
 bool getLocalIP(const std::string& strEthName, std::string& strIP);
 
