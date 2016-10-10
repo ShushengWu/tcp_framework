@@ -1,6 +1,10 @@
 #ifndef __PROCESSOR_H
 #define __PROCESSOR_H
 
+#include <string>
+#include <map>
+#include <vector>
+
 typedef std::pair<uint32_t, uint16_t> PAIR_SVR_INFO;
 
 // 需要继承NetProcessor并实现onProcessor
@@ -40,6 +44,9 @@ class SVCMgr
         
         // 被调方法，请求派发方法。将请求派发给后端服务
         static int onDispatch(int iRouteKey, std::string& strMsg);
+        
+        // 被调方法，请求派发方法。将请求派发给后端服务
+        static int onDispatch(uint32_t ip, uint16_t port, std::string& strMsg);
 
         // 被调方法，请求响应方法
         static int onResponse(int handle, std::string& strMsg);
@@ -54,7 +61,7 @@ class SVCMgr
         bool onRun();
         
         // 更新后端服务
-        bool onUpdateRouter(std::vector<PAIR_SVR_INFO>&);
+        static bool onUpdateRouter(std::map<int, std::vector<PAIR_SVR_INFO> >& mapSvrs);
 };
 
 #endif

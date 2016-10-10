@@ -41,6 +41,8 @@ class ProxyMgr
     void finalize();
 
     void reBuild();
+    
+    void updateProxy(std::tr1::unordered_map<int, SET_SERVER>& mapSvrs);
 
     private:
         ACE_RW_Thread_Mutex m_mutex;

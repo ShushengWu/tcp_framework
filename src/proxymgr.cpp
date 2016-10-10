@@ -52,7 +52,7 @@ bool ProxyMgr::rmSvr(int key, uint32_t ip, uint16_t port)
     
     itr->second.server_list.clear();
     itr->second.server_list.resize(itr->second.servers.size());
-    std::copy(itr->second.servers.begin(), itr->second.servers.end(), itr->second.server_list.begin());    
+    std::copy(itr->second.servers.begin(), itr->second.servers.end(), itr->second.server_list.begin());
     return true;
     
 }
@@ -124,6 +124,60 @@ void ProxyMgr::reBuild()
                     }
                 }
             }
+        }
+    }
+}
+
+
+void ProxyMgr::updateProxy(std::tr1::unordered_map<int, SET_SERVER>& mapSvrs)
+{
+    // 新增路由
+    std::tr1::unordered_map<int, SET_SERVER>::iterator itrMap = mapSvrs.begin();
+    for (; itrMap != mapSvrs.end(); ++itrMap)
+    {
+        SET_SERVER::iterator itrSvr = itrMap->second.begin();
+        for (; itrSvr != itrMap->second.end(); ++itrSvr)
+        {
+            addSvr(itrMap->first, itrSvr->first, itrSvr->second);
+        }
+    }
+    
+    // 删除不存在的路由
+    ACE_Write_Guard<ACE_RW_Thread_Mutex> guard(m_mutex);
+    MAP_PROXY::iterator itr = m_mapProxy.begin();
+    for (; itr != m_mapProxy.end();)
+    {
+        if ( mapSvrs.find(itr->first) == mapSvrs.end() )
+        {
+            // 删除全量路由
+            SET_SERVER::iterator itrSvr = itr->second.servers.begin();
+            for (; itrSvr != itr->second.servers.end(); ++ itrSvr)
+            {
+                SVRMGR::instance()->closeSvr(*itrSvr);
+                SVRMGR::instance()->rmSvr(*itrSvr);
+            }
+            itr = m_mapProxy.erase(itr);
+        }
+        else
+        {
+            // 删除部分路由
+            SET_SERVER::iterator itrSvr = itr->second.servers.begin();
+            for (; itrSvr != itr->second.servers.end(); ++ itrSvr)
+            {
+                if (mapSvrs[itr->first].find(*itrSvr) == mapSvrs[itr->first].end())
+                {
+                    SVRMGR::instance()->closeSvr(*itrSvr);
+                    SVRMGR::instance()->rmSvr(*itrSvr);
+                    itrSvr = itr->second.servers.erase(itrSvr);
+                }
+                else
+                {
+                    ++itrSvr;
+                }
+            }
+            itr->second.server_list.clear();
+            itr->second.server_list.resize(itr->second.servers.size());
+            std::copy(itr->second.servers.begin(), itr->second.servers.end(), itr->second.server_list.begin());
         }
     }
 }

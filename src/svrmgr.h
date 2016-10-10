@@ -42,9 +42,9 @@ class SvrMgr
         
         ~SvrMgr(){};
         
-        void addSvr(PAIR_SVR_INFO& pairSvrInfo);
+        void addSvr(const PAIR_SVR_INFO& pairSvrInfo);
         
-        void rmSvr(PAIR_SVR_INFO& pairSvrInfo);
+        void rmSvr(const PAIR_SVR_INFO& pairSvrInfo);
         
         void addSvrConn(uint32_t, uint16_t, int);
         
@@ -56,7 +56,7 @@ class SvrMgr
         
         bool isSvrExist(const PAIR_SVR_INFO&);
         
-        void closeSvr(PAIR_SVR_INFO& pairSvrInfo);
+        void closeSvr(const PAIR_SVR_INFO& pairSvrInfo);
         
         int getHandleNum(const PAIR_SVR_INFO& pairSvrInfo);
         

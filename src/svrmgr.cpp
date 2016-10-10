@@ -2,7 +2,7 @@
 #include "connmgr.h"
 #include "svrmgr.h"
 
-void SvrMgr::addSvr(PAIR_SVR_INFO& pairSvrInfo)
+void SvrMgr::addSvr(const PAIR_SVR_INFO& pairSvrInfo)
 {
     ACE_Write_Guard<ACE_RW_Thread_Mutex> guard(m_mutex);
     MAP_SERVER::iterator itr = m_mapSvr.find(pairSvrInfo);
@@ -13,7 +13,7 @@ void SvrMgr::addSvr(PAIR_SVR_INFO& pairSvrInfo)
     return;
 } 
 
-void SvrMgr::rmSvr(PAIR_SVR_INFO& pairSvrInfo)
+void SvrMgr::rmSvr(const PAIR_SVR_INFO& pairSvrInfo)
 {
     ACE_Write_Guard<ACE_RW_Thread_Mutex> guard(m_mutex);
     MAP_SERVER::iterator itrSvr = m_mapSvr.find(pairSvrInfo);
@@ -24,7 +24,7 @@ void SvrMgr::rmSvr(PAIR_SVR_INFO& pairSvrInfo)
     return;
 }   
 
-void SvrMgr::closeSvr(PAIR_SVR_INFO& pairSvrInfo)
+void SvrMgr::closeSvr(const PAIR_SVR_INFO& pairSvrInfo)
 {
     HANDLE_SET handles;
     do

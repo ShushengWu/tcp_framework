@@ -1,6 +1,7 @@
 #include "log.h"
 #include "connmgr.h"
 #include "proxymgr.h"
+#include "svrmgr.h"
 #include "datask.h"
 #include "timertask.h"
 #include "util.h"
@@ -111,6 +112,23 @@ int SVCMgr::onDispatch(int iRouteKey, std::string& strMsg)
     }
 }
 
+int onDispatch(uint32_t ip, uint16_t port, std::string& strMsg)
+{
+    PAIR_SVR_INFO pairSvrInfo = std::make_pair(ip, port);
+    int iRet = -1;
+    int handle = SVRMGR::instance()->getConn(pairSvrInfo);
+    if (handle != -1
+        && CONNMGR::instance()->isExist(handle) == true)
+    {
+        iRet = CONNMGR::instance()->write(handle, strMsg);
+        return iRet;
+    }
+    else
+    {
+        return iRet;
+    }
+}
+
 // 请求响应方法
 int SVCMgr::onResponse(int handle, std::string& strMsg)
 {
@@ -207,5 +225,27 @@ bool SVCMgr::onRun()
         delete g_parser;
         g_parser = NULL;
     }
+    return true;
+}
+
+bool onUpdateRouter(std::map<int, std::vector<PAIR_SVR_INFO> >& mapSvrs)
+{
+    typedef std::tr1::unordered_set<PAIR_SVR_INFO, PairHash> SET_SERVER;
+    std::tr1::unordered_map<int, SET_SERVER> mapServer;
+    std::map<int, std::vector<PAIR_SVR_INFO> >::iterator itr = mapSvrs.begin();
+    for (; itr != mapSvrs.end(); ++itr)
+    {
+        if (mapServer.find(itr->first) == mapServer.end())
+        {
+            mapServer[itr->first] = SET_SERVER();
+        }
+        
+        std::vector<PAIR_SVR_INFO>::iterator itrSvr = itr->second.begin();
+        for (; itrSvr != itr->second.end(); ++itrSvr)
+        {
+            mapServer[itr->first].insert(*itrSvr);
+        }
+    }
+    PROXYMGR::instance()->updateProxy(mapServer);
     return true;
 }
