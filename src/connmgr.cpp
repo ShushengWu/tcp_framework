@@ -106,7 +106,8 @@ int ConnMgr::connect(uint32_t ip, uint16_t port )
     DASvcHandler* pclient = NULL;
     if (m_connector.connect(pclient, listen_addr) == -1)
     {
-        LOG_ERROR("<ConnMgr::connect> open connector failed %m\n");
+        LOG_ERROR("<ConnMgr::connect> open connector %s:%d failed %m\n", 
+                  listen_addr.get_host_addr(), listen_addr.get_port_number());
         return -1;
     }
     return 0;

@@ -46,7 +46,7 @@ class SVCMgr
         static int onDispatch(int iRouteKey, std::string& strMsg);
         
         // 被调方法，请求派发方法。将请求派发给后端服务
-        static int onDispatch(uint32_t ip, uint16_t port, std::string& strMsg);
+        static int onDispatch(const uint32_t& ip, const uint16_t& port, std::string& strMsg);
 
         // 被调方法，请求响应方法
         static int onResponse(int handle, std::string& strMsg);

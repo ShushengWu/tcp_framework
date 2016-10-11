@@ -162,7 +162,7 @@ void ProxyMgr::updateProxy(std::tr1::unordered_map<int, SET_SERVER>& mapSvrs)
         {
             // 删除部分路由
             SET_SERVER::iterator itrSvr = itr->second.servers.begin();
-            for (; itrSvr != itr->second.servers.end(); ++ itrSvr)
+            for (; itrSvr != itr->second.servers.end(); )
             {
                 if (mapSvrs[itr->first].find(*itrSvr) == mapSvrs[itr->first].end())
                 {
@@ -178,6 +178,7 @@ void ProxyMgr::updateProxy(std::tr1::unordered_map<int, SET_SERVER>& mapSvrs)
             itr->second.server_list.clear();
             itr->second.server_list.resize(itr->second.servers.size());
             std::copy(itr->second.servers.begin(), itr->second.servers.end(), itr->second.server_list.begin());
+            ++itr;
         }
     }
 }

@@ -51,7 +51,9 @@ SVCMgr::SVCMgr(const string& strConf)
         g_bSVCStatus = false;
     }
 
+#ifdef DEBUG
     enable_debug();
+#endif
     
     // 读取配置
     std::string strNetCard;
@@ -112,7 +114,7 @@ int SVCMgr::onDispatch(int iRouteKey, std::string& strMsg)
     }
 }
 
-int onDispatch(uint32_t ip, uint16_t port, std::string& strMsg)
+int SVCMgr::onDispatch(const uint32_t& ip, const uint16_t& port, std::string& strMsg)
 {
     PAIR_SVR_INFO pairSvrInfo = std::make_pair(ip, port);
     int iRet = -1;
@@ -228,7 +230,7 @@ bool SVCMgr::onRun()
     return true;
 }
 
-bool onUpdateRouter(std::map<int, std::vector<PAIR_SVR_INFO> >& mapSvrs)
+bool SVCMgr::onUpdateRouter(std::map<int, std::vector<PAIR_SVR_INFO> >& mapSvrs)
 {
     typedef std::tr1::unordered_set<PAIR_SVR_INFO, PairHash> SET_SERVER;
     std::tr1::unordered_map<int, SET_SERVER> mapServer;
