@@ -66,7 +66,9 @@ void SvrMgr::addSvrConn(uint32_t ip, uint16_t port, int handle)
 void SvrMgr::rmSvrConn(uint32_t ip, uint16_t port, int handle)
 {
     ACE_Write_Guard<ACE_RW_Thread_Mutex> guard(m_mutex);
-    MAP_SERVER::iterator itr = m_mapSvr.find(std::make_pair(ip, port));
+    LOG_DEBUG("<SvrMgr::rmSvrConn> ip:%d,port:%d,handle:%d\n", ip, port, handle);
+    PAIR_SVR_INFO pairSvrInfo = std::make_pair(ip, port);
+    MAP_SERVER::iterator itr = m_mapSvr.find(pairSvrInfo);
     if (itr != m_mapSvr.end())
     {
         HANDLE_SET::iterator itrHandle = itr->second.handles.find(handle);

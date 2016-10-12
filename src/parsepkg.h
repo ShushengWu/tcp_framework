@@ -100,10 +100,10 @@ public:
 
     size_t getMsgLen(const char* pMsg, const size_t nSize)
     {
-    	if (nSize < MIN_PKG_SIZE)
-    	{
-    	    return -1;
-    	}
+        if (nSize < MIN_PKG_SIZE)
+        {
+            return -1;
+        }
 
         if (*pMsg != PKG_HEAD && *(pMsg+nSize-1) != PKG_TAIL)
         {
@@ -115,6 +115,19 @@ public:
     size_t min_msg_size()
     {
         return MIN_PKG_SIZE;
+    }
+    
+    size_t getDataLen(const char* pMsg, const size_t nSize)
+    {
+        int mlen = getMsgLen(pMsg, nSize);
+        if (mlen == -1)
+        {
+            return -1;
+        }
+        else
+        {
+            return mlen - MIN_PKG_SIZE;
+        }
     }
 };
 

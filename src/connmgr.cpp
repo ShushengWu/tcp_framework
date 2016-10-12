@@ -30,9 +30,13 @@ void ConnMgr::addConn(DASvcHandler* svc)
     return;
 }
 
-void ConnMgr::rmConn(DASvcHandler* svc)
+void ConnMgr::rmConn(ACE_INET_Addr& peer_addr, DASvcHandler* svc)
 {
     int handle = svc->peer().get_handle();
+    if (handle == -1)
+    {
+        return;
+    }
     do
     {
         ACE_Guard<ACE_Recursive_Thread_Mutex> rguard(m_rmutex);
@@ -43,8 +47,6 @@ void ConnMgr::rmConn(DASvcHandler* svc)
         }
     }while(false);
     
-    ACE_INET_Addr peer_addr;
-    svc->peer().get_remote_addr(peer_addr);
     SVRMGR::instance()->rmSvrConn(peer_addr.get_ip_address(),
                                    peer_addr.get_port_number(),
                                    handle);

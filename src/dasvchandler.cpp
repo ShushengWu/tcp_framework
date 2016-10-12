@@ -181,7 +181,8 @@ int DASvcHandler::handle_close(ACE_HANDLE h, ACE_Reactor_Mask mask)
 {
     LOG_INFO("<DASvcHandler::handle_close> close connect,peer:%s, %d\n", 
              m_peer_addr, this->peer().get_handle());
-    CONNMGR::instance()->rmConn(this);
+    ACE_INET_Addr peer_addr(m_peer_addr);
+    CONNMGR::instance()->rmConn(peer_addr, this);
     // 退出释放内存
     if (m_phead != NULL)
     {

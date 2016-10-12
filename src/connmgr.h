@@ -16,7 +16,7 @@ class ConnMgr
 
         void addConn(DASvcHandler*);
     
-        void rmConn(DASvcHandler*);
+        void rmConn(ACE_INET_Addr& peer_addr, DASvcHandler*);
         
         bool isExist(int);
         

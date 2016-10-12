@@ -5,10 +5,12 @@
 #include "log.h"
 #include "connmgr.h"
 #include "processor.h"
+#include "parsepkg.h"
 #include "datask.h"
 
 using namespace std;
 extern bool g_run;
+extern ParsePkg* g_parser;
 
 DATask::DATask():m_mutex(), 
                  m_pProc(NULL)
@@ -66,10 +68,14 @@ bool DATask::process(int handle, ACE_Message_Block* pmsg)
         return bRet;
     }
     
-    if (m_pProc != NULL)
+    if (m_pProc != NULL&&g_parser != NULL)
     {
-        m_pProc->onProcessor(handle, pmsg->rd_ptr(),  pmsg->length());
-        bRet = true;
+        int len = g_parser->getDataLen(pmsg->rd_ptr(),  pmsg->length());
+        if (len != -1)
+        {
+            m_pProc->onProcessor(handle, g_parser->getMsgData(pmsg->rd_ptr(),  pmsg->length()), len);
+            bRet = true;
+        }
     }
 
     return bRet;
